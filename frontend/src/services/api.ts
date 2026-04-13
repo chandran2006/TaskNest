@@ -16,14 +16,16 @@ api.interceptors.request.use((config) => {
 });
 
 // ─── Response Interceptor — handle 401 globally ───────────────────────────────
+const AUTH_PATHS = ['/login', '/signup', '/oauth-success'];
+
 api.interceptors.response.use(
   (res) => res,
   (err: AxiosError) => {
     if (err.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Only redirect if not already on an auth page
-      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/signup')) {
+      const onAuthPage = AUTH_PATHS.some((p) => window.location.pathname.startsWith(p));
+      if (!onAuthPage) {
         window.location.href = '/login';
       }
     }

@@ -62,6 +62,7 @@ function validationError(req, res) {
 // ─── GET /api/tasks ───────────────────────────────────────────────────────────
 async function getTasks(req, res) {
   const { user_id, organization_id } = req.user;
+  if (!organization_id) return res.status(403).json({ message: 'You must belong to an organization to access tasks.' });
 
   try {
     const role = await getFreshRole(user_id);
@@ -89,6 +90,7 @@ async function createTask(req, res) {
 
   const { title, description = '', status = 'pending' } = req.body;
   const { user_id, organization_id } = req.user;
+  if (!organization_id) return res.status(403).json({ message: 'You must belong to an organization to create tasks.' });
 
   try {
     const [result] = await db.query(
@@ -139,7 +141,7 @@ async function updateTask(req, res) {
     const newStatus      = status      !== undefined ? status             : task.status;
 
     await db.query(
-      'UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?',
+      'UPDATE tasks SET title = ?, description = ?, status = ?, updated_at = NOW() WHERE id = ?',
       [newTitle, newDescription, newStatus, taskId]
     );
 

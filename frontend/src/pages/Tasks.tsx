@@ -31,6 +31,7 @@ export default function Tasks() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchTasks = useCallback(async () => {
+    if (!user?.organization_id) { setLoading(false); return; }
     setLoading(true);
     try {
       const res = await tasksAPI.getAll();
@@ -40,7 +41,7 @@ export default function Tasks() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.organization_id]);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
@@ -122,6 +123,15 @@ export default function Tasks() {
 
   return (
     <div className="space-y-4 max-w-7xl">
+      {!user?.organization_id && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
+          <span className="text-2xl">⚠️</span>
+          <div>
+            <p className="font-semibold text-amber-800">No organization assigned.</p>
+            <p className="text-sm text-amber-700 mt-1">You signed in with Google but haven't been assigned to an organization yet. Contact an admin to get access.</p>
+          </div>
+        </div>
+      )}
       <PageHeader
         title="Tasks"
         subtitle={`${filtered.length} of ${tasks.length} task${tasks.length !== 1 ? 's' : ''}`}

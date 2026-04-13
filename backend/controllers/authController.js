@@ -7,7 +7,6 @@ const db                   = require('../config/db');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// Takes a raw DB row — IDs are integers from MySQL
 function generateToken(dbRow) {
   return jwt.sign(
     {
@@ -15,21 +14,20 @@ function generateToken(dbRow) {
       name:            dbRow.name,
       email:           dbRow.email,
       role:            dbRow.role,
-      organization_id: dbRow.organization_id,
+      organization_id: dbRow.organization_id ?? null,
     },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 }
 
-// Returns the shape the frontend User type expects (all IDs as strings)
 function formatUser(dbRow) {
   return {
     id:              String(dbRow.id),
     name:            dbRow.name,
     email:           dbRow.email,
     role:            dbRow.role,
-    organization_id: String(dbRow.organization_id),
+    organization_id: dbRow.organization_id != null ? String(dbRow.organization_id) : null,
   };
 }
 
@@ -73,7 +71,6 @@ async function signup(req, res) {
       [cleanName, cleanEmail, hashedPassword, role, organization_id]
     );
 
-    // Build a raw-style row so generateToken gets integers
     const rawRow = { id: result.insertId, name: cleanName, email: cleanEmail, role, organization_id };
     const token  = generateToken(rawRow);
     const user   = formatUser(rawRow);
@@ -101,7 +98,7 @@ async function login(req, res) {
     // Timing-safe: always run bcrypt even when user not found
     const DUMMY_HASH    = '$2a$12$dummyhashfortimingprotection.000000000000000000000000';
     const dbUser        = rows[0] || null;
-    const hashToCompare = dbUser ? dbUser.password : DUMMY_HASH;
+    const hashToCompare = dbUser?.password || DUMMY_HASH;
     const isMatch       = await bcrypt.compare(password, hashToCompare);
 
     if (!dbUser || !isMatch) {

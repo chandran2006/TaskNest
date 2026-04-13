@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import AuditLogs from './pages/AuditLogs';
 import LandingPage from './pages/LandingPage';
+import OAuthSuccess from './pages/OAuthSuccess';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
 
           {/* Guest only */}
           <Route element={<GuestRoute />}>

@@ -5,7 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  organization_id: string;
+  organization_id: string | null;
 }
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';

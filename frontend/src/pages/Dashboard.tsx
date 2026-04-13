@@ -64,11 +64,12 @@ export default function Dashboard() {
   const [memberCount, setMemberCount] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!user?.organization_id) { setLoading(false); return; }
     tasksAPI.getAll()
       .then((res) => setTasks(res.data.tasks))
       .catch((err) => toast.error(getErrorMessage(err, 'Failed to load task stats.')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.organization_id]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -92,6 +93,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl">
+      {/* No-org banner for Google OAuth users */}
+      {!user?.organization_id && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
+          <span className="text-2xl">⚠️</span>
+          <div>
+            <p className="font-semibold text-amber-800">You're not assigned to an organization yet.</p>
+            <p className="text-sm text-amber-700 mt-1">
+              You signed in with Google. Ask an admin to assign you to an organization before you can create or view tasks.
+            </p>
+          </div>
+        </div>
+      )}
       {/* Welcome Banner */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary-600 via-primary-700 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
         <div className="absolute inset-0 opacity-10">
@@ -115,7 +128,10 @@ export default function Dashboard() {
             <div className="flex items-center gap-3 mt-3 flex-wrap">
               <RoleBadge role={user?.role ?? 'member'} />
               <span className="text-primary-200 text-xs">
-                Organization <span className="font-semibold text-white">#{user?.organization_id}</span>
+                {user?.organization_id
+                  ? <>Organization <span className="font-semibold text-white">#{user.organization_id}</span></>
+                  : <span className="italic">No organization</span>
+                }
               </span>
             </div>
           </div>
@@ -171,7 +187,9 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between">
               <dt className="text-gray-500">Organization</dt>
-              <dd className="font-medium text-gray-900">#{user?.organization_id}</dd>
+              <dd className="font-medium text-gray-900">
+                {user?.organization_id ? `#${user.organization_id}` : <span className="text-gray-400 italic text-xs">Not assigned</span>}
+              </dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-gray-500">My Tasks</dt>

@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const morgan    = require('morgan');
 require('dotenv').config();
 
+const passport       = require('./config/passport');
 const authRoutes     = require('./routes/auth');
 const taskRoutes     = require('./routes/tasks');
 const auditLogRoutes = require('./routes/auditLogs');
@@ -14,7 +15,6 @@ const auditLogRoutes = require('./routes/auditLogs');
 const app = express();
 
 // ─── Security Headers ─────────────────────────────────────────────────────────
-// Trust proxy so express-rate-limit reads the real client IP behind nginx/load-balancer
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
 app.use(helmet({
@@ -43,13 +43,14 @@ const globalLimiter = rateLimit({
   message: { message: 'Too many requests. Please try again later.' },
 });
 
+// Only applied to login/signup — NOT to Google OAuth redirect routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many auth attempts. Please try again in 15 minutes.' },
-  skipSuccessfulRequests: true, // Only count failed attempts
+  skipSuccessfulRequests: true,
 });
 
 app.use(globalLimiter);
@@ -58,13 +59,19 @@ app.use(globalLimiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+// ─── Passport (sessionless) ───────────────────────────────────────────────────
+app.use(passport.initialize());
+
 // ─── HTTP Request Logging ─────────────────────────────────────────────────────
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/auth',       authLimiter, authRoutes);
-app.use('/api/tasks',      taskRoutes);
-app.use('/api/audit-logs', auditLogRoutes);
+// authLimiter only on login/signup — Google OAuth routes are exempt (they're browser redirects)
+app.use('/api/auth/login',    authLimiter);
+app.use('/api/auth/signup',   authLimiter);
+app.use('/api/auth',          authRoutes);
+app.use('/api/tasks',         taskRoutes);
+app.use('/api/audit-logs',    auditLogRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -85,7 +92,6 @@ app.use((_req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
-  // CORS errors
   if (err.message && err.message.startsWith('CORS:')) {
     return res.status(403).json({ message: err.message });
   }

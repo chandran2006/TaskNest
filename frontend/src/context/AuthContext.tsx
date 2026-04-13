@@ -27,12 +27,22 @@ async function fetchUserFromServer(): Promise<User | null> {
   }
 }
 
+function FullScreenLoader() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
+        <p className="text-slate-400 text-sm">Loading TaskNest…</p>
+      </div>
+    </div>
+  );
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]   = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
-  // On startup: validate token and fetch fresh role from DB
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
 
@@ -42,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Token is in localStorage — interceptor will attach it automatically
     fetchUserFromServer().then((freshUser) => {
       if (freshUser) {
         setToken(storedToken);
@@ -55,16 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // After login/signup: set token first (so interceptor can use it), then fetch fresh role
   const login = useCallback(async (newToken: string, newUser: User) => {
-    // Set token in localStorage BEFORE calling fetchUserFromServer
-    // so the request interceptor can attach it
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
 
-    // Fetch fresh user from DB to get the definitive role
     const freshUser = await fetchUserFromServer();
     if (freshUser) {
       setUser(freshUser);
@@ -72,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Force a role re-check from DB — call this after any role change
   const refreshUser = useCallback(async () => {
     const freshUser = await fetchUserFromServer();
     if (freshUser) {
@@ -87,8 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  // Block render until role is confirmed from DB
-  if (!ready) return null;
+  if (!ready) return <FullScreenLoader />;
 
   return (
     <AuthContext.Provider value={{

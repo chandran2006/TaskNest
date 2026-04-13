@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const db   = require('./config/db');
 const app  = require('./app');
-const PORT = parseInt(process.env.PORT || '5000', 10);
+const PORT = parseInt(process.env.PORT || '8080', 10);
 
 const server = app.listen(PORT, () => {
   console.log(`🚀 TaskNest API  →  http://localhost:${PORT}`);

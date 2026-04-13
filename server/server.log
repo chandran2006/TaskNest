@@ -1,0 +1,17 @@
+◇ injected env (7) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+🚀 TaskNest API running on http://localhost:5000
+📋 Environment: development
+✅ MySQL connected successfully
+[2026-04-12T17:23:28.424Z] POST /api/auth/signup
+[2026-04-12T17:23:28.821Z] GET /api/tasks
+[2026-04-12T17:23:28.834Z] GET /api/tasks
+[2026-04-12T17:23:40.786Z] GET /api/tasks
+[2026-04-12T17:23:40.791Z] GET /api/tasks
+[2026-04-12T17:23:41.729Z] GET /api/tasks
+[2026-04-12T17:23:41.734Z] GET /api/tasks
+[2026-04-12T17:23:47.232Z] GET /api/tasks
+[2026-04-12T17:23:47.235Z] GET /api/tasks
+[2026-04-12T17:25:12.546Z] GET /api/tasks
+[2026-04-12T17:25:12.550Z] GET /api/tasks

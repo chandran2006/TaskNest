@@ -28,10 +28,10 @@ export default function OAuthSuccess() {
 
     api.get<{ user: User }>('/auth/me')
       .then(async ({ data }) => {
-        // Pass user directly — login() will also re-fetch but that's fine for freshness
         await login(token, data.user);
         toast.success(`Welcome, ${data.user.name}! 🎉`);
-        navigate('/dashboard', { replace: true });
+        const dest = data.user.organization_id ? '/dashboard' : '/org-setup';
+        navigate(dest, { replace: true });
       })
       .catch(() => {
         localStorage.removeItem('token');

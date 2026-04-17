@@ -60,6 +60,9 @@ export const authAPI = {
     adminKey?: string;
     organization_id: string;
   }) => api.post<AuthResponse>('/auth/signup', data),
+
+  setOrganization: (organization_id: string) =>
+    api.put<{ user: User }>('/auth/me/organization', { organization_id }),
 };
 
 // ─── Tasks API ────────────────────────────────────────────────────────────────

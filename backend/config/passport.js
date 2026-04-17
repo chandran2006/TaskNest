@@ -24,10 +24,9 @@ passport.use(new GoogleStrategy(
       const [[existing]] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
       if (existing) return done(null, existing);
 
-      const DEFAULT_ORG_ID = 1;
       const [result] = await db.query(
         'INSERT INTO users (name, email, password, role, organization_id) VALUES (?, ?, ?, ?, ?)',
-        [name, email, '', 'member', DEFAULT_ORG_ID]
+        [name, email, '', 'member', null]
       );
 
       const [[newUser]] = await db.query('SELECT * FROM users WHERE id = ?', [result.insertId]);

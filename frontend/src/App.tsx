@@ -10,6 +10,7 @@ import Tasks from './pages/Tasks';
 import AuditLogs from './pages/AuditLogs';
 import LandingPage from './pages/LandingPage';
 import OAuthSuccess from './pages/OAuthSuccess';
+import OrgSetup from './pages/OrgSetup';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route path="/org-setup" element={<OrgSetup />} />
 
           {/* Guest only */}
           <Route element={<GuestRoute />}>

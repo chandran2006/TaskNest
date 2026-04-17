@@ -146,4 +146,28 @@ async function getMembersCount(req, res) {
   }
 }
 
-module.exports = { signup, login, getMe, getMembersCount };
+// ─── PUT /api/auth/me/organization ──────────────────────────────────────────
+async function setOrganization(req, res) {
+  const { organization_id } = req.body;
+  if (!organization_id || !Number.isInteger(Number(organization_id))) {
+    return res.status(400).json({ message: 'Valid organization_id is required.' });
+  }
+
+  try {
+    const [[org]] = await db.query('SELECT id FROM organizations WHERE id = ?', [organization_id]);
+    if (!org) return res.status(404).json({ message: `Organization ${organization_id} not found.` });
+
+    await db.query('UPDATE users SET organization_id = ? WHERE id = ?', [organization_id, req.user.user_id]);
+
+    const [[updated]] = await db.query(
+      'SELECT id, name, email, role, organization_id FROM users WHERE id = ?',
+      [req.user.user_id]
+    );
+    return res.json({ user: formatUser(updated) });
+  } catch (err) {
+    console.error('[Auth] setOrganization error:', err);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
+}
+
+module.exports = { signup, login, getMe, getMembersCount, setOrganization };

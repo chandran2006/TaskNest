@@ -3,7 +3,7 @@
 const express              = require('express');
 const { body }             = require('express-validator');
 const jwt                  = require('jsonwebtoken');
-const { signup, login, getMe, getMembersCount } = require('../controllers/authController');
+const { signup, login, getMe, getMembersCount, setOrganization } = require('../controllers/authController');
 const auth                 = require('../middleware/auth');
 const passport             = require('../config/passport');
 
@@ -41,6 +41,7 @@ router.post('/signup',         signupRules, signup);
 router.post('/login',          loginRules,  login);
 router.get('/me',              auth,        getMe);
 router.get('/members/count',   auth,        getMembersCount);
+router.put('/me/organization', auth,        setOrganization);
 
 // ─── Google OAuth ─────────────────────────────────────────────────────────────
 router.get('/google',

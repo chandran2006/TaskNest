@@ -86,17 +86,6 @@ app.use('/api/tasks',       taskRoutes);
 app.use('/api/audit-logs',  auditLogRoutes);
 app.use('/api/org',         orgRoutes);
 
-// ─── TEMPORARY: DB Setup Route — REMOVE AFTER USE ───────────────────────────
-app.get('/setup-db', async (_req, res) => {
-  try {
-    await require('./config/setupDb')();
-    res.status(200).send('✅ DB Setup Done');
-  } catch (err) {
-    console.error('DB Setup Error:', err);
-    res.status(500).send('❌ Error setting up database');
-  }
-});
-
 // ─── 404 ──────────────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }));
 

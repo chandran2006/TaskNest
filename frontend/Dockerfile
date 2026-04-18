@@ -9,19 +9,11 @@ COPY . .
 RUN npm run build
 
 # ── Serve stage ───────────────────────────────────────────────────────────────
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-COPY --from=builder /app/dist ./dist
-
-# Run as non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 5173
 
-CMD ["npm", "run", "preview"]
+CMD ["nginx", "-g", "daemon off;"]

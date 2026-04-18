@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   # ── MySQL Database ────────────────────────────────────────────────────────────
@@ -49,8 +47,7 @@ services:
       - '5173:5173'
     depends_on:
       - backend
-    environment:
-      VITE_API_TARGET: http://backend:8080
+
 
 volumes:
   db_data:

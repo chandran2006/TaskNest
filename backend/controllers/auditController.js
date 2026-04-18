@@ -5,19 +5,38 @@ const db                   = require('../config/db');
 
 const VALID_ACTIONS = ['CREATE', 'UPDATE', 'DELETE'];
 
-const AUDIT_BASE_SQL = `
-  SELECT al.id, al.action, al.task_id, al.user_id, al.created_at AS timestamp,
-         u.name AS user_name, u.email AS user_email, t.title AS task_title
-  FROM audit_logs al
-  INNER JOIN users u ON al.user_id = u.id
-  LEFT  JOIN tasks t ON al.task_id = t.id
-  WHERE u.organization_id = ?`;
+// Two fully static query variants — no dynamic SQL concatenation
+const SQL = {
+  listAll: `
+    SELECT al.id, al.action, al.task_id, al.user_id, al.created_at AS timestamp,
+           u.name AS user_name, u.email AS user_email, t.title AS task_title
+    FROM audit_logs al
+    INNER JOIN users u ON al.user_id = u.id
+    LEFT  JOIN tasks t ON al.task_id = t.id
+    WHERE u.organization_id = ?
+    ORDER BY al.created_at DESC LIMIT ? OFFSET ?`,
 
-const AUDIT_COUNT_SQL = `
-  SELECT COUNT(*) AS total
-  FROM audit_logs al
-  INNER JOIN users u ON al.user_id = u.id
-  WHERE u.organization_id = ?`;
+  listByAction: `
+    SELECT al.id, al.action, al.task_id, al.user_id, al.created_at AS timestamp,
+           u.name AS user_name, u.email AS user_email, t.title AS task_title
+    FROM audit_logs al
+    INNER JOIN users u ON al.user_id = u.id
+    LEFT  JOIN tasks t ON al.task_id = t.id
+    WHERE u.organization_id = ? AND al.action = ?
+    ORDER BY al.created_at DESC LIMIT ? OFFSET ?`,
+
+  countAll: `
+    SELECT COUNT(*) AS total
+    FROM audit_logs al
+    INNER JOIN users u ON al.user_id = u.id
+    WHERE u.organization_id = ?`,
+
+  countByAction: `
+    SELECT COUNT(*) AS total
+    FROM audit_logs al
+    INNER JOIN users u ON al.user_id = u.id
+    WHERE u.organization_id = ? AND al.action = ?`,
+};
 
 // ─── GET /api/audit-logs ──────────────────────────────────────────────────────
 async function getAuditLogs(req, res) {
@@ -45,16 +64,20 @@ async function getAuditLogs(req, res) {
       return res.status(403).json({ message: 'You must belong to an organization to view audit logs.' });
     }
 
-    const actionClause = action ? ' AND al.action = ?' : '';
-    const baseParams   = action ? [organizationId, action] : [organizationId];
-
     const [
       [[{ total }]],
       [rows],
-    ] = await Promise.all([
-      db.query(`${AUDIT_COUNT_SQL}${actionClause}`, baseParams),
-      db.query(`${AUDIT_BASE_SQL}${actionClause} ORDER BY al.created_at DESC LIMIT ? OFFSET ?`, [...baseParams, limit, offset]),
-    ]);
+    ] = await Promise.all(
+      action
+        ? [
+            db.query(SQL.countByAction, [organizationId, action]),
+            db.query(SQL.listByAction,  [organizationId, action, limit, offset]),
+          ]
+        : [
+            db.query(SQL.countAll, [organizationId]),
+            db.query(SQL.listAll,  [organizationId, limit, offset]),
+          ]
+    );
 
     const logs = rows.map((log) => ({
       id:         String(log.id),

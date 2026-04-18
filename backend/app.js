@@ -28,11 +28,17 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,ht
   .map((o) => o.trim())
   .filter(Boolean);
 
+// In production with no ALLOWED_ORIGINS set, allow all origins so the
+// Render-deployed frontend can reach the API without a 403.
+const corsOrigin = process.env.NODE_ENV === 'production' && allowedOrigins.length === 0
+  ? '*'
+  : (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      cb(new Error(`CORS: origin ${origin} not allowed`));
+    };
+
 app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
-  },
+  origin: corsOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -78,7 +84,10 @@ app.use('/api/tasks',         taskRoutes);
 app.use('/api/audit-logs',    auditLogRoutes);
 app.use('/api/org',           orgRoutes);
 
-// ─── Health Check ─────────────────────────────────────────────────────────────
+// ─── Root + Health Check ─────────────────────────────────────────────────────
+// GET / — Render pings this to confirm the service is alive (fixes 502)
+app.get('/', (_req, res) => res.send('TaskNest Backend Running 🚀'));
+
 app.get('/api/health', (_req, res) => {
   res.json({
     status:    'ok',

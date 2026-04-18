@@ -13,7 +13,7 @@ const schema = [
     id              INT AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(100) NOT NULL,
     email           VARCHAR(100) NOT NULL UNIQUE,
-    password        TEXT         NOT NULL DEFAULT '',
+    password        VARCHAR(255) NOT NULL,
     role            ENUM('admin','member') NOT NULL DEFAULT 'member',
     organization_id INT          NULL,
     created_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +49,7 @@ const schema = [
   `INSERT IGNORE INTO organizations (id, name) VALUES (1, 'Default Organization')`,
 ];
 
-(async () => {
+async function setupDb() {
   const conn = await mysql.createConnection({
     host:     process.env.DB_HOST,
     port:     parseInt(process.env.DB_PORT || '3306', 10),
@@ -59,14 +59,23 @@ const schema = [
     ssl:      { rejectUnauthorized: false },
   });
 
-  for (const sql of schema) {
-    await conn.query(sql);
-    console.log('✅', sql.trim().split('\n')[0].substring(0, 60));
+  try {
+    for (const sql of schema) {
+      await conn.query(sql);
+      console.log('✅', sql.trim().split('\n')[0].substring(0, 60));
+    }
+    console.log('\n🎉 Schema setup complete.');
+  } finally {
+    await conn.end();
   }
+}
 
-  console.log('\n🎉 Schema setup complete.');
-  await conn.end();
-})().catch((err) => {
-  console.error('❌ Schema setup failed:', err.message);
-  process.exit(1);
-});
+module.exports = setupDb;
+
+// Allow running directly: node config/setupDb.js
+if (require.main === module) {
+  setupDb().catch((err) => {
+    console.error('❌ Schema setup failed:', err.message);
+    process.exit(1);
+  });
+}

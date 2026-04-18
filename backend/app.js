@@ -26,6 +26,18 @@ app.get('/api/health', (_req, res) => res.json({
   env:       process.env.NODE_ENV || 'development',
 }));
 
+// ─── One-time DB Setup Route ─────────────────────────────────────────────────────
+app.get('/setup-db', async (_req, res) => {
+  try {
+    const setupDb = require('./config/setupDb');
+    await setupDb();
+    res.send('✅ DB Setup Done — all tables created.');
+  } catch (err) {
+    console.error('[Setup] DB setup error:', err.message);
+    res.status(500).send(`❌ DB Setup Failed: ${err.message}`);
+  }
+});
+
 // ─── Security Headers ─────────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 

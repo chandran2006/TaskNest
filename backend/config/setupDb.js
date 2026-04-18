@@ -49,12 +49,14 @@ const schema = [
   `INSERT IGNORE INTO organizations (id, name) VALUES (1, 'Default Organization')`,
 ];
 
-(async () => {
+module.exports = async function setupDb() {
   const conn = await mysql.createConnection({
     host:     process.env.DB_HOST,
+    port:     parseInt(process.env.DB_PORT || '3306', 10),
     user:     process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    ssl:      { rejectUnauthorized: false },
   });
 
   for (const sql of schema) {
@@ -64,7 +66,4 @@ const schema = [
 
   console.log('\n🎉 Schema setup complete.');
   await conn.end();
-})().catch((err) => {
-  console.error('❌ Schema setup failed:', err.message);
-  process.exit(1);
-});
+};

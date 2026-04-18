@@ -1,11 +1,18 @@
 import axios, { type AxiosError } from 'axios';
 import type { Task, AuditLog, User } from '../types';
 
+// ─── Base URL ─────────────────────────────────────────────────────────────────
+// In production (Netlify) VITE_API_URL must be set to the Render backend URL.
+// In development the Vite proxy rewrites /api → localhost:8080, so '/api' works.
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 15000,
 });
 
 // ─── Request Interceptor — attach JWT ─────────────────────────────────────────
@@ -42,9 +49,10 @@ export function getErrorMessage(err: unknown, fallback = 'Something went wrong.'
 }
 
 // ─── Google OAuth URL ────────────────────────────────────────────────────────
-// Relative path — proxied by Vite in dev, served by same origin in prod.
-// Not a credential — this is a public OAuth initiation endpoint.
-export const GOOGLE_AUTH_URL = '/api/auth/google';
+// Must be absolute in production — Netlify cannot proxy browser OAuth redirects.
+export const GOOGLE_AUTH_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/auth/google`
+  : '/api/auth/google';
 
 // ─── Auth API ─────────────────────────────────────────────────────────────────
 export interface AuthResponse {

@@ -15,12 +15,21 @@ const orgRoutes      = require('./routes/org');
 
 const app = express();
 
+// ─── Health Check (MUST be first — Render sends HEAD / before any middleware) ─
+app.get('/',          (_req, res) => res.send('TaskNest Backend Running 🚀'));
+app.head('/',         (_req, res) => res.sendStatus(200));
+app.get('/api/health', (_req, res) => res.json({
+  status:    'ok',
+  service:   'TaskNest API',
+  timestamp: new Date().toISOString(),
+  uptime:    Math.floor(process.uptime()),
+  env:       process.env.NODE_ENV || 'development',
+}));
+
 // ─── Security Headers ─────────────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-}));
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
@@ -28,17 +37,12 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,ht
   .map((o) => o.trim())
   .filter(Boolean);
 
-// In production with no ALLOWED_ORIGINS set, allow all origins so the
-// Render-deployed frontend can reach the API without a 403.
-const corsOrigin = process.env.NODE_ENV === 'production' && allowedOrigins.length === 0
-  ? '*'
-  : (origin, cb) => {
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-      cb(new Error(`CORS: origin ${origin} not allowed`));
-    };
-
 app.use(cors({
-  origin: corsOrigin,
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -53,7 +57,6 @@ const globalLimiter = rateLimit({
   message: { message: 'Too many requests. Please try again later.' },
 });
 
-// Only applied to login/signup — NOT to Google OAuth redirect routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -75,38 +78,32 @@ app.use(passport.initialize());
 // ─── HTTP Request Logging ─────────────────────────────────────────────────────
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
-// authLimiter only on login/signup — Google OAuth routes are exempt (they're browser redirects)
-app.use('/api/auth/login',    authLimiter);
-app.use('/api/auth/signup',   authLimiter);
-app.use('/api/auth',          authRoutes);
-app.use('/api/tasks',         taskRoutes);
-app.use('/api/audit-logs',    auditLogRoutes);
-app.use('/api/org',           orgRoutes);
+// ─── API Routes ───────────────────────────────────────────────────────────────
+app.use('/api/auth/login',  authLimiter);
+app.use('/api/auth/signup', authLimiter);
+app.use('/api/auth',        authRoutes);
+app.use('/api/tasks',       taskRoutes);
+app.use('/api/audit-logs',  auditLogRoutes);
+app.use('/api/org',         orgRoutes);
 
-// ─── Root + Health Check ─────────────────────────────────────────────────────
-// GET / — Render pings this to confirm the service is alive (fixes 502)
-app.get('/', (_req, res) => res.send('TaskNest Backend Running 🚀'));
-
-app.get('/api/health', (_req, res) => {
-  res.json({
-    status:    'ok',
-    service:   'TaskNest API',
-    version:   process.env.npm_package_version || '1.0.0',
-    timestamp: new Date().toISOString(),
-    uptime:    Math.floor(process.uptime()),
-  });
+// ─── TEMPORARY: DB Setup Route — REMOVE AFTER USE ───────────────────────────
+app.get('/setup-db', async (_req, res) => {
+  try {
+    await require('./config/setupDb')();
+    res.status(200).send('✅ DB Setup Done');
+  } catch (err) {
+    console.error('DB Setup Error:', err);
+    res.status(500).send('❌ Error setting up database');
+  }
 });
 
-// ─── 404 ─────────────────────────────────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ message: 'Route not found.' });
-});
+// ─── 404 ──────────────────────────────────────────────────────────────────────
+app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }));
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
-  if (err.message && err.message.startsWith('CORS:')) {
+  if (err.message?.startsWith('CORS:')) {
     return res.status(403).json({ message: err.message });
   }
   console.error('[Server] Unhandled error:', err);

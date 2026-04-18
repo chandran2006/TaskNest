@@ -58,3 +58,6 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 -- Default org so signup works immediately
 INSERT IGNORE INTO organizations (id, name) VALUES (1, 'Default Organization');
+
+-- If the table was created before this schema update, ensure organization_id allows NULL
+-- ALTER TABLE users MODIFY organization_id INT NULL;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { auditAPI, getErrorMessage } from '../services/api';
 import { EmptyState, SkeletonRow, Avatar, PageHeader } from '../components/UI';
 import type { AuditLog, AuditAction } from '../types';
@@ -13,44 +13,40 @@ const ACTION_CONFIG: Record<AuditAction, { cls: string; icon: string }> = {
 const PAGE_SIZE = 15;
 
 export default function AuditLogs() {
-  const [logs, setLogs]           = useState<AuditLog[]>([]);
-  const [loading, setLoading]     = useState(true);
+  const [logs, setLogs]               = useState<AuditLog[]>([]);
+  const [loading, setLoading]         = useState(true);
   const [actionFilter, setActionFilter] = useState<string>('all');
-  const [search, setSearch]       = useState('');
-  const [page, setPage]           = useState(1);
+  const [page, setPage]               = useState(1);
+  const [totalPages, setTotalPages]   = useState(1);
+  const [total, setTotal]             = useState(0);
 
   useEffect(() => {
-    auditAPI.getAll()
-      .then((res) => setLogs(res.data.logs))
+    setLoading(true);
+    const params = {
+      page,
+      limit: PAGE_SIZE,
+      ...(actionFilter !== 'all' && { action: actionFilter }),
+    };
+    auditAPI.getAll(params)
+      .then((res) => {
+        setLogs(res.data.logs);
+        setTotalPages(res.data.pagination.totalPages);
+        setTotal(res.data.pagination.total);
+      })
       .catch((err) => toast.error(getErrorMessage(err, 'Failed to load audit logs.')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [page, actionFilter]);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return logs.filter((l) => {
-      const matchAction = actionFilter === 'all' || l.action === actionFilter;
-      const matchSearch = !q
-        || l.task_title?.toLowerCase().includes(q)
-        || l.user_name?.toLowerCase().includes(q)
-        || l.user_email?.toLowerCase().includes(q);
-      return matchAction && matchSearch;
-    });
-  }, [logs, actionFilter, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const counts = useMemo(() => logs.reduce(
-    (acc, l) => { acc[l.action]++; acc.all++; return acc; },
-    { all: 0, CREATE: 0, UPDATE: 0, DELETE: 0 } as Record<AuditAction | 'all', number>
-  ), [logs]);
+  const handleFilterChange = (a: string) => {
+    setActionFilter(a);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-4 max-w-7xl">
       <PageHeader
         title="Audit Logs"
-        subtitle="Complete history of all task actions in your organization"
+        subtitle={`Complete history of all task actions in your organization${total > 0 ? ` · ${total} total` : ''}`}
       />
 
       {/* Action Filter Tabs */}
@@ -58,32 +54,14 @@ export default function AuditLogs() {
         {(['all', 'CREATE', 'UPDATE', 'DELETE'] as const).map((a) => (
           <button
             key={a}
-            onClick={() => { setActionFilter(a); setPage(1); }}
+            onClick={() => handleFilterChange(a)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               actionFilter === a ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {a === 'all' ? 'All Actions' : a}
-            <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${
-              actionFilter === a ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-500'
-            }`}>
-              {counts[a]}
-            </span>
           </button>
         ))}
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
-        </svg>
-        <input
-          className="input pl-9 max-w-sm"
-          placeholder="Search by task or user…"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        />
       </div>
 
       {/* Table */}
@@ -101,14 +79,14 @@ export default function AuditLogs() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 [...Array(6)].map((_, i) => <SkeletonRow key={i} cols={4} />)
-              ) : paginated.length === 0 ? (
+              ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan={4}>
-                    <EmptyState message={search || actionFilter !== 'all' ? 'No logs match your filters.' : 'No audit logs yet.'} />
+                    <EmptyState message={actionFilter !== 'all' ? 'No logs match your filters.' : 'No audit logs yet.'} />
                   </td>
                 </tr>
               ) : (
-                paginated.map((log) => {
+                logs.map((log) => {
                   const cfg = ACTION_CONFIG[log.action] ?? { cls: 'bg-gray-100 text-gray-700', icon: '?' };
                   return (
                     <tr key={log.id} className="hover:bg-gray-50 transition-colors group">
@@ -147,7 +125,7 @@ export default function AuditLogs() {
         {!loading && totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">
             <span className="text-xs text-gray-500">
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} logs
+              Page {page} of {totalPages} · {total} logs
             </span>
             <div className="flex items-center gap-1">
               <button className="btn-secondary text-xs py-1 px-2.5 disabled:opacity-40" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>‹ Prev</button>

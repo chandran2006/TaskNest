@@ -7,6 +7,12 @@ const { getTasks, createTask, updateTask, deleteTask } = require('../controllers
 
 const router = express.Router();
 
+// ─── CSRF Note ────────────────────────────────────────────────────────────────
+// This API uses stateless JWT Bearer token authentication (Authorization header),
+// not cookie-based sessions. Bearer token auth is inherently CSRF-safe because
+// cross-origin requests cannot set the Authorization header via HTML forms.
+// No additional CSRF middleware is required.
+
 const VALID_STATUSES = ['pending', 'in_progress', 'completed'];
 
 const createRules = [

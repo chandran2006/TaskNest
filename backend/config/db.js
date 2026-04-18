@@ -15,6 +15,7 @@ const pool = mysql.createPool({
   timezone:           'Z',
   charset:            'utf8mb4',
   decimalNumbers:     true,
+  multipleStatements: false, // defense-in-depth: prevent stacked SQL queries
 });
 
 // Verify connection on startup

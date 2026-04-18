@@ -2,12 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install deps first (layer cache)
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy source
 COPY . .
+
+# Run as non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 EXPOSE 8080
 

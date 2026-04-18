@@ -27,7 +27,7 @@ export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE';
 export interface AuditLog {
   id: string;
   action: AuditAction;
-  task_id: string;
+  task_id: string | null;
   user_id: string;
   user_name?: string;
   user_email?: string;

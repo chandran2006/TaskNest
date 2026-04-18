@@ -11,6 +11,7 @@ const passport       = require('./config/passport');
 const authRoutes     = require('./routes/auth');
 const taskRoutes     = require('./routes/tasks');
 const auditLogRoutes = require('./routes/auditLogs');
+const orgRoutes      = require('./routes/org');
 
 const app = express();
 
@@ -22,7 +23,10 @@ app.use(helmet({
 }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',');
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
@@ -72,6 +76,7 @@ app.use('/api/auth/signup',   authLimiter);
 app.use('/api/auth',          authRoutes);
 app.use('/api/tasks',         taskRoutes);
 app.use('/api/audit-logs',    auditLogRoutes);
+app.use('/api/org',           orgRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

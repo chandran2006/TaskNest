@@ -126,10 +126,13 @@ export default function Tasks() {
       {!user?.organization_id && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
           <span className="text-2xl">⚠️</span>
-          <div>
+          <div className="flex-1">
             <p className="font-semibold text-amber-800">No organization assigned.</p>
-            <p className="text-sm text-amber-700 mt-1">You signed in with Google but haven't been assigned to an organization yet. Contact an admin to get access.</p>
+            <p className="text-sm text-amber-700 mt-1">Join or create an organization to start managing tasks.</p>
           </div>
+          <a href="/select-org" className="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">
+            Set up →
+          </a>
         </div>
       )}
       <PageHeader

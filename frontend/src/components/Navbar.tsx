@@ -8,7 +8,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/fav.png" alt="TaskNest" className="w-9 h-9 rounded-lg object-contain" />
+          <img src="/logo.svg" alt="TaskNest" className="w-9 h-9 rounded-lg object-contain" />
           <span className="text-xl font-bold text-gray-900">TaskNest</span>
         </Link>
 

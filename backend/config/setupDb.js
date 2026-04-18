@@ -13,10 +13,11 @@ const schema = [
     id              INT AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(100) NOT NULL,
     email           VARCHAR(100) NOT NULL UNIQUE,
-    password        TEXT         NOT NULL,
-    role            VARCHAR(20)  NOT NULL DEFAULT 'member',
-    organization_id INT          NOT NULL,
-    created_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    password        TEXT         NOT NULL DEFAULT '',
+    role            ENUM('admin','member') NOT NULL DEFAULT 'member',
+    organization_id INT          NULL,
+    created_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_org FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE SET NULL
   )`,
 
   `CREATE TABLE IF NOT EXISTS tasks (

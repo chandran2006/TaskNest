@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { tasksAPI, getErrorMessage } from '../services/api';
 import api from '../services/api';
@@ -59,24 +59,25 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 
 export default function Dashboard() {
   const { user, isAdmin }     = useAuth();
+  const navigate              = useNavigate();
   const [tasks, setTasks]     = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [memberCount, setMemberCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user?.organization_id) { setLoading(false); return; }
-    tasksAPI.getAll()
-      .then((res) => setTasks(res.data.tasks))
-      .catch((err) => toast.error(getErrorMessage(err, 'Failed to load task stats.')))
+    const fetches: Promise<unknown>[] = [
+      tasksAPI.getAll().then((res) => setTasks(res.data.tasks)),
+    ];
+    if (isAdmin) {
+      fetches.push(
+        api.get<{ count: number }>('/auth/members/count').then((res) => setMemberCount(res.data.count))
+      );
+    }
+    Promise.all(fetches)
+      .catch((err) => toast.error(getErrorMessage(err, 'Failed to load dashboard.')))
       .finally(() => setLoading(false));
-  }, [user?.organization_id]);
-
-  useEffect(() => {
-    if (!isAdmin) return;
-    api.get<{ count: number }>('/auth/members/count')
-      .then((res) => setMemberCount(res.data.count))
-      .catch(() => setMemberCount(null));
-  }, [isAdmin]);
+  }, [user?.organization_id, isAdmin]);
 
   const total = tasks.length;
   const { myCount, completed, inProgress, pending } = tasks.reduce(
@@ -97,12 +98,18 @@ export default function Dashboard() {
       {!user?.organization_id && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
           <span className="text-2xl">⚠️</span>
-          <div>
+          <div className="flex-1">
             <p className="font-semibold text-amber-800">You're not assigned to an organization yet.</p>
             <p className="text-sm text-amber-700 mt-1">
-              You signed in with Google. Ask an admin to assign you to an organization before you can create or view tasks.
+              You signed in with Google. Join or create an organization to start managing tasks.
             </p>
           </div>
+          <button
+            onClick={() => navigate('/select-org')}
+            className="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Set up →
+          </button>
         </div>
       )}
       {/* Welcome Banner */}

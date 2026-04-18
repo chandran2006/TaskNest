@@ -1,14 +1,26 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# ── Serve stage ───────────────────────────────────────────────────────────────
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install all deps (including devDeps needed for build)
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
-# Copy source and build
-COPY . .
-RUN npm run build
+COPY --from=builder /app/dist ./dist
+
+# Run as non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 EXPOSE 5173
 

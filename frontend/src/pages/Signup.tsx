@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authAPI, getErrorMessage } from '../services/api';
+import { authAPI, getErrorMessage, GOOGLE_AUTH_URL } from '../services/api';
 import { Spinner, InlineError } from '../components/UI';
 import toast from 'react-hot-toast';
 
@@ -87,7 +87,7 @@ export default function Signup() {
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-2xl">
-            <img src="/fav.png" alt="TaskNest" className="w-16 h-16 rounded-2xl object-contain" />
+            <img src="/logo.svg" alt="TaskNest" className="w-16 h-16 rounded-2xl object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-white">TaskNest</h1>
           <p className="text-slate-400 mt-1 text-sm">Create your workspace account</p>
@@ -197,7 +197,7 @@ export default function Signup() {
 
           <button
             type="button"
-            onClick={() => { window.location.href = 'http://localhost:8080/api/auth/google'; }}
+            onClick={() => { window.location.href = GOOGLE_AUTH_URL; }}
             className="flex items-center justify-center gap-3 w-full py-2.5 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

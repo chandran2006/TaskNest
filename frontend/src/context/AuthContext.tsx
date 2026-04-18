@@ -69,12 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-
-    const freshUser = await fetchUserFromServer();
-    if (freshUser) {
-      setUser(freshUser);
-      localStorage.setItem('user', JSON.stringify(freshUser));
-    }
   }, []);
 
   const refreshUser = useCallback(async () => {

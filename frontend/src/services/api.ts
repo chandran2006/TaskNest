@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
 });
 
 // ─── Response Interceptor — handle 401 globally ───────────────────────────────
-const AUTH_PATHS = ['/login', '/signup', '/oauth-success'];
+const AUTH_PATHS = ['/login', '/signup', '/oauth-success', '/select-org', '/org-setup'];
 
 api.interceptors.response.use(
   (res) => res,
@@ -41,6 +41,11 @@ export function getErrorMessage(err: unknown, fallback = 'Something went wrong.'
   return fallback;
 }
 
+// ─── Google OAuth URL ────────────────────────────────────────────────────────
+// Relative path — proxied by Vite in dev, served by same origin in prod.
+// Not a credential — this is a public OAuth initiation endpoint.
+export const GOOGLE_AUTH_URL = '/api/auth/google';
+
 // ─── Auth API ─────────────────────────────────────────────────────────────────
 export interface AuthResponse {
   token: string;
@@ -62,7 +67,16 @@ export const authAPI = {
   }) => api.post<AuthResponse>('/auth/signup', data),
 
   setOrganization: (organization_id: string) =>
-    api.put<{ user: User }>('/auth/me/organization', { organization_id }),
+    api.put<{ user: User; token?: string }>('/auth/me/organization', { organization_id }),
+};
+
+// ─── Org API ──────────────────────────────────────────────────────────────────
+export const orgAPI = {
+  select: (organization_id: number) =>
+    api.post<{ message: string; organization: { id: number; name: string }; token?: string }>('/org/select', { organization_id }),
+
+  create: (name: string) =>
+    api.post<{ message: string; organization: { id: number; name: string }; token?: string }>('/org/create', { name }),
 };
 
 // ─── Tasks API ────────────────────────────────────────────────────────────────
@@ -84,10 +98,14 @@ export const tasksAPI = {
 };
 
 // ─── Audit Logs API ───────────────────────────────────────────────────────────
-export interface AuditLogsResponse { logs: AuditLog[] }
+export interface AuditLogsResponse {
+  logs: AuditLog[];
+  pagination: { total: number; page: number; limit: number; totalPages: number };
+}
 
 export const auditAPI = {
-  getAll: () => api.get<AuditLogsResponse>('/audit-logs'),
+  getAll: (params?: { page?: number; limit?: number; action?: string }) =>
+    api.get<AuditLogsResponse>('/audit-logs', { params }),
 };
 
 export default api;

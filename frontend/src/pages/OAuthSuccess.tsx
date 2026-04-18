@@ -14,6 +14,7 @@ export default function OAuthSuccess() {
     if (ran.current) return;
     ran.current = true;
 
+    // Read token from query string
     const params = new URLSearchParams(window.location.search);
     const token  = params.get('token');
 
@@ -30,7 +31,7 @@ export default function OAuthSuccess() {
       .then(async ({ data }) => {
         await login(token, data.user);
         toast.success(`Welcome, ${data.user.name}! 🎉`);
-        const dest = data.user.organization_id ? '/dashboard' : '/org-setup';
+        const dest = data.user.organization_id ? '/dashboard' : '/select-org';
         navigate(dest, { replace: true });
       })
       .catch(() => {

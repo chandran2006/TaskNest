@@ -65,7 +65,7 @@ function SidebarContent({ user, isAdmin, onClose, onLogout }: SidebarContentProp
       {/* Logo */}
       <div className="px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
-          <img src="/fav.png" alt="TaskNest" className="w-8 h-8 rounded-lg object-contain" />
+          <img src="/logo.svg" alt="TaskNest" className="w-8 h-8 rounded-lg object-contain" />
           <div>
             <span className="font-bold text-gray-900 text-base leading-none">TaskNest</span>
             <p className="text-xs text-gray-400 leading-none mt-0.5">Workspace</p>

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute, AdminRoute, GuestRoute } from './components/RouteGuards';
+import { ProtectedRoute, AdminRoute, GuestRoute, OrgSetupRoute } from './components/RouteGuards';
 import AppLayout from './layouts/AppLayout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -20,7 +20,12 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
-          <Route path="/org-setup" element={<OrgSetup />} />
+
+          {/* Requires token but no org yet */}
+          <Route element={<OrgSetupRoute />}>
+            <Route path="/select-org" element={<OrgSetup />} />
+            <Route path="/org-setup"  element={<OrgSetup />} />
+          </Route>
 
           {/* Guest only */}
           <Route element={<GuestRoute />}>

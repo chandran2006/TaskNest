@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2160 2160" width="2160" height="2160" fill="none">
+
+  <!-- ── Deep dark background ── -->
+  <rect width="2160" height="2160" rx="320" fill="#0a0f1e"/>
+
+  <!-- ── Subtle radial glow behind icon ── -->
+  <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.18"/>
+    <stop offset="55%" stop-color="#6366f1" stop-opacity="0.07"/>
+    <stop offset="100%" stop-color="#0a0f1e" stop-opacity="0"/>
+  </radialGradient>
+  <circle cx="1080" cy="1080" r="900" fill="url(#centerGlow)"/>
+
+  <!-- ── Green accent glow (bottom-left) ── -->
+  <radialGradient id="greenGlow" cx="30%" cy="70%" r="40%">
+    <stop offset="0%" stop-color="#22c55e" stop-opacity="0.10"/>
+    <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+  </radialGradient>
+  <circle cx="648" cy="1512" r="700" fill="url(#greenGlow)"/>
+
+  <!-- ══════════════════════════════════════════════
+       NEST — woven arc structure
+  ══════════════════════════════════════════════ -->
+
+  <!-- Shadow ellipse under nest -->
+  <ellipse cx="1080" cy="1560" rx="620" ry="90" fill="#2563eb" opacity="0.10"/>
+
+  <!-- Nest outer arc -->
+  <path d="M460 1420 Q460 1660 1080 1660 Q1700 1660 1700 1420"
+        stroke="#1e40af" stroke-width="52" stroke-linecap="round" fill="none"/>
+
+  <!-- Nest mid weave arc 1 -->
+  <path d="M520 1480 Q700 1580 1080 1580 Q1460 1580 1640 1480"
+        stroke="#2563eb" stroke-width="34" stroke-linecap="round" fill="none" opacity="0.55"/>
+
+  <!-- Nest mid weave arc 2 -->
+  <path d="M580 1530 Q760 1610 1080 1610 Q1400 1610 1580 1530"
+        stroke="#2563eb" stroke-width="24" stroke-linecap="round" fill="none" opacity="0.32"/>
+
+  <!-- Nest left twig 1 -->
+  <path d="M460 1420 Q380 1340 420 1240"
+        stroke="#1e40af" stroke-width="44" stroke-linecap="round" fill="none"/>
+  <!-- Nest left twig 2 -->
+  <path d="M460 1420 Q360 1390 310 1420"
+        stroke="#1e40af" stroke-width="36" stroke-linecap="round" fill="none"/>
+  <!-- Nest left twig 3 -->
+  <path d="M530 1380 Q460 1300 490 1200"
+        stroke="#2563eb" stroke-width="28" stroke-linecap="round" fill="none" opacity="0.65"/>
+
+  <!-- Nest right twig 1 -->
+  <path d="M1700 1420 Q1780 1340 1740 1240"
+        stroke="#1e40af" stroke-width="44" stroke-linecap="round" fill="none"/>
+  <!-- Nest right twig 2 -->
+  <path d="M1700 1420 Q1800 1390 1850 1420"
+        stroke="#1e40af" stroke-width="36" stroke-linecap="round" fill="none"/>
+  <!-- Nest right twig 3 -->
+  <path d="M1630 1380 Q1700 1300 1670 1200"
+        stroke="#2563eb" stroke-width="28" stroke-linecap="round" fill="none" opacity="0.65"/>
+
+  <!-- ══════════════════════════════════════════════
+       TASK CARDS — stacked with depth
+  ══════════════════════════════════════════════ -->
+
+  <!-- Gradients for cards -->
+  <linearGradient id="card3Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0d1b3e"/>
+    <stop offset="100%" stop-color="#0a1628"/>
+  </linearGradient>
+  <linearGradient id="card2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#1a2d5a"/>
+    <stop offset="100%" stop-color="#0f1e42"/>
+  </linearGradient>
+  <linearGradient id="card1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#2563eb"/>
+    <stop offset="100%" stop-color="#1d4ed8"/>
+  </linearGradient>
+
+  <!-- Card 3 — back left -->
+  <rect x="620" y="720" width="560" height="460" rx="60"
+        fill="url(#card3Grad)" stroke="#1e3a8a" stroke-width="3" opacity="0.70"/>
+
+  <!-- Card 2 — middle -->
+  <rect x="720" y="640" width="560" height="460" rx="60"
+        fill="url(#card2Grad)" stroke="#2563eb" stroke-width="3" opacity="0.85"/>
+
+  <!-- Card 1 — front (main) -->
+  <rect x="840" y="560" width="620" height="500" rx="64"
+        fill="url(#card1Grad)"/>
+  <!-- Card 1 border glow -->
+  <rect x="840" y="560" width="620" height="500" rx="64"
+        fill="none" stroke="#3b82f6" stroke-width="4" opacity="0.60"/>
+  <!-- Card 1 inner highlight -->
+  <rect x="840" y="560" width="620" height="120" rx="64"
+        fill="white" opacity="0.04"/>
+
+  <!-- ── Card 1 content ── -->
+
+  <!-- Title bar placeholder -->
+  <rect x="900" y="620" width="340" height="36" rx="18" fill="white" opacity="0.20"/>
+  <rect x="900" y="672" width="240" height="26" rx="13" fill="white" opacity="0.12"/>
+
+  <!-- Row 1: checkbox + line -->
+  <circle cx="920" cy="760" r="30" fill="#22c55e"/>
+  <!-- Checkmark row 1 -->
+  <path d="M906 760 L916 772 L936 748"
+        stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="968" y="748" width="200" height="24" rx="12" fill="white" opacity="0.22"/>
+  <rect x="968" y="780" width="140" height="18" rx="9" fill="white" opacity="0.12"/>
+
+  <!-- Row 2: checkbox + line -->
+  <circle cx="920" cy="870" r="30" fill="#16a34a"/>
+  <!-- Checkmark row 2 -->
+  <path d="M906 870 L916 882 L936 858"
+        stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="968" y="858" width="220" height="24" rx="12" fill="white" opacity="0.22"/>
+  <rect x="968" y="890" width="160" height="18" rx="9" fill="white" opacity="0.12"/>
+
+  <!-- Row 3: pending circle + line -->
+  <circle cx="920" cy="980" r="30" fill="white" fill-opacity="0.12" stroke="white" stroke-width="4" stroke-opacity="0.30"/>
+  <rect x="968" y="968" width="180" height="24" rx="12" fill="white" opacity="0.15"/>
+  <rect x="968" y="1000" width="120" height="18" rx="9" fill="white" opacity="0.08"/>
+
+  <!-- ── Card 2 peeking content ── -->
+  <rect x="780" y="700" width="200" height="22" rx="11" fill="white" opacity="0.10"/>
+  <circle cx="760" cy="760" r="22" fill="#22c55e" opacity="0.50"/>
+  <rect x="792" y="750" width="160" height="20" rx="10" fill="white" opacity="0.08"/>
+
+  <!-- ── Card 3 peeking content ── -->
+  <rect x="680" y="780" width="160" height="20" rx="10" fill="white" opacity="0.07"/>
+
+  <!-- ══════════════════════════════════════════════
+       ACCENT DOTS — floating particles
+  ══════════════════════════════════════════════ -->
+  <circle cx="1560" cy="680" r="18" fill="#22c55e" opacity="0.70"/>
+  <circle cx="1620" cy="760" r="10" fill="#3b82f6" opacity="0.50"/>
+  <circle cx="560"  cy="700" r="14" fill="#6366f1" opacity="0.55"/>
+  <circle cx="500"  cy="800" r="8"  fill="#22c55e" opacity="0.40"/>
+  <circle cx="1680" cy="1100" r="12" fill="#2563eb" opacity="0.40"/>
+  <circle cx="440"  cy="1200" r="10" fill="#3b82f6" opacity="0.35"/>
+
+  <!-- ══════════════════════════════════════════════
+       CORNER BRACKET ACCENTS
+  ══════════════════════════════════════════════ -->
+  <!-- Top-left -->
+  <path d="M200 380 L200 200 L380 200"
+        stroke="#2563eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
+  <!-- Top-right -->
+  <path d="M1960 380 L1960 200 L1780 200"
+        stroke="#2563eb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
+  <!-- Bottom-left -->
+  <path d="M200 1780 L200 1960 L380 1960"
+        stroke="#22c55e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
+  <!-- Bottom-right -->
+  <path d="M1960 1780 L1960 1960 L1780 1960"
+        stroke="#22c55e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
+
+</svg>
